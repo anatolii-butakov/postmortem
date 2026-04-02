@@ -123,25 +123,25 @@ textarea.prompt-input:focus{outline:2px solid #378add;outline-offset:1px}
 </head>
 <body>
 <div class="app">
-
+ 
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;flex-wrap:wrap;gap:8px">
     <div>
       <div style="font-size:18px;font-weight:600">Постмортум аналізатор</div>
       <div style="font-size:13px;color:var(--text2)">3D студія · аналіз проектів</div>
     </div>
   </div>
-
+ 
   <div class="api-bar">
     <label>API key</label>
     <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off">
     <span class="api-status" id="apiStatus"></span>
   </div>
-
+ 
   <div class="nav">
     <button class="nav-tab active" onclick="switchTab('analyze')">Аналіз</button>
     <button class="nav-tab" onclick="switchTab('prompt')">Промпт</button>
   </div>
-
+ 
   <div class="tab-panel active" id="tab-analyze">
     <div id="uploadSection">
       <div class="upload-zone" id="dropZone">
@@ -160,18 +160,18 @@ textarea.prompt-input:focus{outline:2px solid #378add;outline-offset:1px}
       </div>
       <div class="error-box" id="errorBox"></div>
     </div>
-
+ 
     <div class="progress-wrap" id="progressWrap">
       <div style="font-size:14px;font-weight:500;margin-bottom:4px">Аналізуємо проект...</div>
       <div class="progress-label" id="progressLabel">Читаємо файл...</div>
       <div class="progress-bg"><div class="progress-fill" id="progressFill" style="width:5%"></div></div>
     </div>
-
+ 
     <div id="reportWrap" style="display:none">
       <div id="report"></div>
     </div>
   </div>
-
+ 
   <div class="tab-panel" id="tab-prompt">
     <div class="prompt-wrap">
       <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Системний промпт</div>
@@ -193,29 +193,29 @@ textarea.prompt-input:focus{outline:2px solid #378add;outline-offset:1px}
       </div>
     </div>
   </div>
-
+ 
 </div>
 <script>
 const DEFAULT_PROMPT = `Ти аналітик операційних процесів у 3D-студії візуалізації. Твоє завдання — постмортум аналіз проекту для COO студії.
-
+ 
 Формат подачі: стисло, по суті, з акцентом на бізнес-вплив і системні збої процесів. Уникай переказу переписки — тільки висновки, цифри і що треба змінити. Процеси описуй як "де система дала збій", а не "хто що написав".
-
+ 
 КОНТЕКСТ РОЛЕЙ:
 - Client: клієнт (зовнішня сторона)
 - Client Manager: менеджер по роботі з клієнтами
 - Project Manager: веде задачі і комунікацію з клієнтом
 - Mentor: внутрішній контроль якості
 - 3D Artist: виконавець
-
+ 
 ДАНІ ПРОЕКТУ:
 Проект: {{PROJECT}}, {{DURATION}} днів ({{DATES}})
 {{STATS}}
 Задачі: {{TASKS}}
 Паузи клієнта (>3 днів): {{GAPS}}
-
+ 
 УСІ ПОВІДОМЛЕННЯ:
 {{MESSAGES}}
-
+ 
 Поверни ТІЛЬКИ валідний JSON без markdown огорожі:
 {
   "overall_health": "critical|warning|ok",
@@ -277,9 +277,9 @@ const DEFAULT_PROMPT = `Ти аналітик операційних проце�
     }
   ]
 }`;
-
+ 
 let csvData = null;
-
+ 
 // Init API key
 const savedKey = localStorage.getItem('pm_api_key');
 if (savedKey) {
@@ -293,29 +293,29 @@ document.getElementById('apiKey').addEventListener('input', e => {
     document.getElementById('apiStatus').textContent = 'збережено';
   }
 });
-
+ 
 // Init prompt
 document.getElementById('promptInput').value = localStorage.getItem('pm_prompt') || DEFAULT_PROMPT;
-
+ 
 function switchTab(tab) {
   document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', ['analyze','prompt'][i]===tab));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
 }
-
+ 
 function savePrompt() {
   localStorage.setItem('pm_prompt', document.getElementById('promptInput').value);
   const el = document.getElementById('savedMsg');
   el.classList.add('show');
   setTimeout(()=>el.classList.remove('show'), 2000);
 }
-
+ 
 function resetPrompt() {
   if (!confirm('Скинути промпт до дефолтного?')) return;
   document.getElementById('promptInput').value = DEFAULT_PROMPT;
   localStorage.removeItem('pm_prompt');
 }
-
+ 
 // File handling
 const dz = document.getElementById('dropZone');
 const fi = document.getElementById('fileInput');
@@ -327,14 +327,14 @@ dz.addEventListener('drop', e=>{
   if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
 });
 fi.addEventListener('change', e=>{if(e.target.files[0])loadFile(e.target.files[0])});
-
+ 
 function loadFile(f) {
   document.getElementById('fileName').textContent = f.name;
   const reader = new FileReader();
   reader.onload = e=>{csvData=e.target.result; showError('');};
   reader.readAsText(f,'UTF-8');
 }
-
+ 
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
   if (lines.length<2) return null;
@@ -350,7 +350,7 @@ function parseCSV(text) {
   }
   return {rows};
 }
-
+ 
 function splitLine(line,sep) {
   const r=[]; let cur='',inQ=false;
   for (const c of line) {
@@ -360,7 +360,7 @@ function splitLine(line,sep) {
   }
   r.push(cur); return r;
 }
-
+ 
 function setProgress(pct,label) {
   document.getElementById('progressFill').style.width=pct+'%';
   document.getElementById('progressLabel').textContent=label;
@@ -369,7 +369,7 @@ function showError(msg) {
   const el=document.getElementById('errorBox');
   el.textContent=msg; el.classList.toggle('show',!!msg);
 }
-
+ 
 function isClient(r){return (r.user_role||'').toLowerCase()==='client'}
 function isPublic(r){const v=r.visible_for_client;return v==='TRUE'||v===true||v==='true'}
 function isInternal(r){const v=r.visible_for_client;return v==='FALSE'||v===false||v==='false'}
@@ -378,20 +378,20 @@ function isNoise(body){
   if(!body||body.length<8) return true;
   return /^(\+\+|ok|ок|okay|👍|🙏|дякую|дякуємо|noted|sure|thanks|thank you|зрозуміло|зрозуміла|зрозумів|прийнято|received|got it|sounds good|perfect|great|👌|ясно|добре!?|ок!?|так!?|нє|ні|ага|угу|ладно|супер|чудово|все|хм+|\.\.\.|—|-)\W*$/i.test(body.trim());
 }
-
+ 
 async function startAnalysis() {
   const apiKey = document.getElementById('apiKey').value.trim();
   if (!apiKey) {showError('Введіть Anthropic API ключ');return;}
   if (!csvData) {showError('Завантажте CSV файл');return;}
   const parsed = parseCSV(csvData);
   if (!parsed||parsed.rows.length===0) {showError('Не вдалось розпарсити CSV');return;}
-
+ 
   showError('');
   document.getElementById('uploadSection').style.display='none';
   const pw=document.getElementById('progressWrap');
   pw.classList.add('show'); pw.style.display='block';
   document.getElementById('reportWrap').style.display='none';
-
+ 
   setProgress(10,'Парсинг даних...');
   console.log('[PM] CSV rows:', parsed.rows.length, 'first row keys:', Object.keys(parsed.rows[0]||{}));
   let stats, prompt;
@@ -405,9 +405,10 @@ async function startAnalysis() {
     showError('Помилка парсингу: '+e.message); return;
   }
   setProgress(50,'AI аналізує переписку...');
-
+ 
   let analysis;
   try {
+    setProgress(60,'AI аналізує переписку...');
     const resp = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
@@ -419,31 +420,13 @@ async function startAnalysis() {
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
         max_tokens:4000,
-        stream:true,
         messages:[{role:'user',content:prompt}]
       })
     });
     if (!resp.ok) {const err=await resp.json();throw new Error(err.error?.message||`HTTP ${resp.status}`);}
-    const reader=resp.body.getReader(), decoder=new TextDecoder();
-    let raw='',tokens=0;
-    while(true){
-      const {done,value}=await reader.read();
-      if(done) break;
-      const lines=decoder.decode(value,{stream:true}).split('\n');
-      for(const line of lines){
-        if(!line.startsWith('data: ')) continue;
-        const d=line.slice(6).trim();
-        if(d==='[DONE]') continue;
-        try{
-          const evt=JSON.parse(d);
-          if(evt.type==='content_block_delta'&&evt.delta?.type==='text_delta'){
-            raw+=evt.delta.text; tokens++;
-            setProgress(Math.min(88,50+Math.round(tokens/6)),`AI пише звіт... (${tokens*4}+ символів)`);
-          }
-        }catch{}
-      }
-    }
-    raw=raw.trim().replace(/```json|```/g,'').trim();
+    setProgress(85,'Отримали відповідь, парсимо...');
+    const data=await resp.json();
+    let raw=data.content[0].text.trim().replace(/```json|```/g,'').trim();
     const s=raw.indexOf('{'),e=raw.lastIndexOf('}');
     if(s!==-1&&e!==-1) raw=raw.slice(s,e+1);
     analysis=JSON.parse(raw);
@@ -453,7 +436,7 @@ async function startAnalysis() {
     showError('Помилка API: '+e.message);
     return;
   }
-
+ 
   setProgress(95,'Будуємо звіт...');
   renderReport(stats,analysis);
   setProgress(100,'Готово!');
@@ -463,24 +446,29 @@ async function startAnalysis() {
     document.getElementById('reportWrap').style.display='block';
   },300);
 }
-
+ 
 function parseDate(s) {
   if(!s) return new Date(0);
   const d = new Date(s);
   return isNaN(d) ? new Date(s.replace(' ','T')) : d;
 }
-
+ 
 function buildStats(rows) {
   const sorted=[...rows].filter(r=>r.created_at).sort((a,b)=>parseDate(a.created_at)-parseDate(b.created_at));
   if(sorted.length===0) throw new Error('Немає рядків з датою created_at');
-  const start=parseDate(sorted[0].created_at), end=parseDate(sorted[sorted.length-1].created_at);
+  // find first/last row with valid date
+  const validSorted = sorted.filter(r=>!isNaN(parseDate(r.created_at)));
+  if(validSorted.length===0) throw new Error('Жоден рядок не має валідної дати');
+  const start=parseDate(validSorted[0].created_at), end=parseDate(validSorted[validSorted.length-1].created_at);
   const durationDays=Math.round((end-start)/86400000);
   const projectName=sorted.find(r=>r.project_name)?.project_name||'Проект';
   const taskMap={};
   sorted.forEach(r=>{const tk=r.task_name||'(корінь проекту)';if(!taskMap[tk])taskMap[tk]=[];taskMap[tk].push(r);});
   const tasks=Object.entries(taskMap).map(([name,msgs])=>{
     const ts=[...msgs].sort((a,b)=>parseDate(a.created_at)-parseDate(b.created_at));
+    if(ts.length===0) return null;
     const tS=parseDate(ts[0].created_at),tE=parseDate(ts[ts.length-1].created_at);
+    if(isNaN(tS)||isNaN(tE)) return null;
     let rounds=0,lastTeam=false,ourWait=0,clientWait=0,lastCd=null,lastTd=null;
     ts.forEach(m=>{
       const cl=isClient(m),pub=isPublic(m),d=parseDate(m.created_at);
@@ -489,7 +477,7 @@ function buildStats(rows) {
     });
     return {name,start:tS.toISOString().slice(0,10),end:tE.toISOString().slice(0,10),
       days:Math.round((tE-tS)/86400000),rounds,clientMsgs:msgs.filter(isClient).length,ourWait,clientWait};
-  });
+  }).filter(Boolean);
   const clientMsgs=sorted.filter(isClient);
   const gaps=[];
   for(let i=1;i<clientMsgs.length;i++){
@@ -504,7 +492,7 @@ function buildStats(rows) {
     internalMsgs:sorted.filter(isInternal).length,mentorMsgs:sorted.filter(isMentor).length,
     tasks,gaps,allMsgs};
 }
-
+ 
 function buildPrompt(s) {
   return (localStorage.getItem('pm_prompt')||DEFAULT_PROMPT)
     .replace('{{PROJECT}}',s.projectName)
@@ -515,9 +503,9 @@ function buildPrompt(s) {
     .replace('{{GAPS}}',s.gaps.map(g=>`${g.days} дн (${g.from}→${g.to})`).join(', ')||'немає')
     .replace('{{MESSAGES}}',s.allMsgs.join('\n'));
 }
-
+ 
 function fmt(n){return Math.round(n||0)}
-
+ 
 function renderReport(s,a) {
   const health=a.overall_health;
   const hBadge=health==='critical'?'b-red':health==='warning'?'b-amber':'b-green';
@@ -526,7 +514,7 @@ function renderReport(s,a) {
   const totalOurWait=s.tasks.reduce((sum,t)=>sum+t.ourWait,0);
   const totalClientWait=s.tasks.reduce((sum,t)=>sum+t.clientWait,0);
   const bi=a.business_impact||{};
-
+ 
   let html=`
   <div style="margin-bottom:1.5rem">
     <div style="font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Постмортум звіт</div>
@@ -537,12 +525,12 @@ function renderReport(s,a) {
       <button class="btn" onclick="window.print()">Друк / PDF</button>
     </div>
   </div>
-
+ 
   <div class="exec-summary">
     <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Executive summary</div>
     <p>${a.executive_summary||a.overall_summary||''}</p>
   </div>
-
+ 
   <div class="metric-grid">
     <div class="metric"><div class="metric-label">Тривалість</div><div class="metric-val">${fmt(s.durationDays)}</div><div class="metric-sub">днів</div></div>
     <div class="metric ${fmt(totalRounds)>6?'highlight':''}"><div class="metric-label">Раунди правок</div><div class="metric-val">${fmt(totalRounds)}</div><div class="metric-sub">${fmt(bi.extra_rounds||0)} понад ліміт</div></div>
@@ -551,7 +539,7 @@ function renderReport(s,a) {
     <div class="metric ${bi.reputation_risk==='high'?'highlight':''}"><div class="metric-label">Репутація</div><div class="metric-val" style="font-size:15px;padding-top:4px"><span class="badge ${bi.reputation_risk==='high'?'b-red':bi.reputation_risk==='medium'?'b-amber':'b-green'}">${bi.reputation_risk==='high'?'Високий ризик':bi.reputation_risk==='medium'?'Середній ризик':'Низький ризик'}</span></div></div>
   </div>
   ${bi.extra_rounds_note||bi.financial_note?`<div style="font-size:12px;color:var(--text2);background:var(--bg2);padding:8px 12px;border-radius:var(--radius);margin-bottom:1.5rem;line-height:1.6">${[bi.extra_rounds_note,bi.financial_note].filter(Boolean).join(' · ')}</div>`:''}`;
-
+ 
   // Timeline
   const tl=a.timeline||{};
   html+=`<div class="section-title">Таймлайн</div><div class="card">`;
@@ -571,7 +559,7 @@ function renderReport(s,a) {
     <span class="badge ${tl.expectations_set?'b-green':'b-red'}">${tl.expectations_set?'Очікування пояснені':'Очікування не пояснені'}</span>
     <span style="font-size:12px;color:var(--text2)">${tl.expectations_note||''}</span>
   </div></div>`;
-
+ 
   // Tasks
   html+=`<div class="section-title">Задачі та час відповідальності</div><div class="card">
   <table class="task-table"><thead><tr>
@@ -590,7 +578,7 @@ function renderReport(s,a) {
     </tr>`;
   });
   html+=`</tbody></table></div>`;
-
+ 
   // Process failures
   html+=`<div class="section-title">Збої процесів</div><div class="card">`;
   (a.process_failures||a.what_went_wrong||[]).forEach(w=>{
@@ -612,7 +600,7 @@ function renderReport(s,a) {
     </div>`;
   });
   html+=`</div>`;
-
+ 
   // Communication
   const comm=a.communication||{};
   html+=`<div class="section-title">Комунікація</div><div class="card">`;
@@ -625,14 +613,14 @@ function renderReport(s,a) {
   if(comm.info_to_artist) html+=`<div style="font-size:12px;background:var(--bg2);padding:8px 10px;border-radius:var(--radius);color:var(--text2);margin-bottom:10px"><strong>Передача задачі художнику:</strong> ${comm.info_to_artist}</div>`;
   (comm.issues||[]).forEach(iss=>{html+=`<div class="issue-row"><div class="dot" style="background:var(--red-dot)"></div><div class="issue-body">${iss}</div></div>`;});
   html+=`</div>`;
-
+ 
   // What went right
   if((a.what_went_right||[]).length){
     html+=`<div class="section-title">Що спрацювало</div><div class="card">`;
     a.what_went_right.forEach(w=>{html+=`<div class="issue-row"><div class="dot" style="background:var(--green-dot)"></div><div class="issue-body">${w}</div></div>`;});
     html+=`</div>`;
   }
-
+ 
   // Recommendations
   html+=`<div class="section-title">Рекомендації</div>`;
   (a.recommendations||[]).forEach(rec=>{
@@ -644,7 +632,7 @@ function renderReport(s,a) {
       <div class="rec-why">${rec.expected_result||rec.rationale||''}</div>
     </div>`;
   });
-
+ 
   document.getElementById('report').innerHTML=html;
 }
 </script>
