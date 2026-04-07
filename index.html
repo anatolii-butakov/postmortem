@@ -531,6 +531,7 @@ function buildStats(rows) {
       else if(cl){if(lastTd){clientWait+=Math.round((d-lastTd)/86400000);}lastCd=d;lastTd=null;}
     });
     const rounds=countRounds(ts);
+    console.log('[PM] task:',name,'rounds:',rounds,'msgs:',ts.length);
     return {name,start:tS.toISOString().slice(0,10),end:tE.toISOString().slice(0,10),
       days:Math.round((tE-tS)/86400000),rounds,ourWait,clientWait};
   }).filter(Boolean);
