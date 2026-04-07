@@ -435,23 +435,8 @@ async function startAnalysis() {
 }
 
 
-const DELIVERY_RE = new RegExp(
-  '(check.{0,20}result|attached above|please review|please check.{0,30}result|' +
-  'looking forward.{0,20}feedback|here you can find|results? attached|' +
-  'find.{0,20}result|updated result|check.{0,20}updated|' +
-  'sending.{0,20}result|prepared.{0,20}result|' +
-  'final result is ready|result is ready|' +
-  'check the.{0,20}result|check.{0,10}(new|first|updated|latest).{0,10}result|' +
-  'share your (feedback|thoughts)|let us know your thoughts|' +
-  'let us know if.{0,20}(good|ok|correct|proceed)|' +
-  'review the prepared|prepared.{0,10}(draft|result|image))',
-  'i'
-);
-const FUTURE_RE = new RegExp(
-  '\\b(will send|will prepare|will provide|will get back|will check|' +
-  'will be ready|will present|aiming to provide|going to send)\\b',
-  'i'
-);
+const DELIVERY_RE = /check.{0,20}result|attached above|please review|please check.{0,30}result|looking forward.{0,20}feedback|here you can find|results? attached|find.{0,20}result|updated result|check.{0,20}updated|sending.{0,20}result|prepared.{0,20}result|final result is ready|result is ready|check the.{0,20}result|check.{0,10}(?:new|first|updated|latest).{0,10}result|share your (?:feedback|thoughts)|let us know your thoughts|let us know if.{0,20}(?:good|ok|correct|proceed)|review the prepared|prepared.{0,10}(?:draft|result|image)/i;
+const FUTURE_RE = /will send|will prepare|will provide|will get back|will check|will be ready|will present|aiming to provide|going to send/i;
 const APPROVAL_RE = /^(ok\.?|okay|approved|perfect|great|noted|received|got it|will do|sounds good|yes please|confirmed|moving forward|thank you|thanks)[.!,\s]*$/i;
 
 function isDelivery(body) {
