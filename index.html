@@ -478,11 +478,14 @@ function countRounds(msgs) {
   let deliveryCount = 0;
   let i = 0;
   while (i < msgs.length) {
-    const m = msgs[i];
-    const body = String(m.body||'');
-    const d = parseDate(m.created_at); const date = isNaN(d) ? String(m.created_at||'').slice(0,10) : d.toDateString();
-    const client = isClient(m);
-    const pub = isPublic(m);
+    let m, body, date, client, pub;
+    try {
+      m = msgs[i];
+      body = String(m.body||'');
+      const d = parseDate(m.created_at); date = isNaN(d) ? String(m.created_at||'').slice(0,10) : d.toDateString();
+      client = isClient(m);
+      pub = isPublic(m);
+    } catch(e) { console.log('[PM] loop error at',i,e.message); i++; continue; }
     if (state === 'waiting_delivery') {
       if (!client && pub) {
         const del = isDelivery(body);
