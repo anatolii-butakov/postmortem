@@ -370,9 +370,13 @@ function isClient(r){return (r.user_role||'').toLowerCase()==='client'}
 function isPublic(r){const v=r.visible_for_client;return v==='TRUE'||v===true||v==='true'}
 function isInternal(r){const v=r.visible_for_client;return v==='FALSE'||v===false||v==='false'}
 function isMentor(r){return (r.user_role||'').toLowerCase()==='mentor'}
+const NOISE_WORDS = ['++','ok','ок','okay','дякую','дякуємо','noted','sure','thanks','thank you',
+  'зрозуміло','зрозуміла','зрозумів','прийнято','received','got it','sounds good','perfect',
+  'great','ясно','добре','ладно','супер','чудово','все','хм','...','—','-','так','ні','нє','ага','угу'];
 function isNoise(body){
   if(!body||body.length<8) return true;
-  return /^(\+\+|ok|ок|okay|👍|🙏|дякую|дякуємо|noted|sure|thanks|thank you|зрозуміло|зрозуміла|зрозумів|прийнято|received|got it|sounds good|perfect|great|👌|ясно|добре!?|ок!?|так!?|нє|ні|ага|угу|ладно|супер|чудово|все|хм+|\.\.\.|—|-)\W*$/i.test(body.trim());
+  const b = String(body).trim().toLowerCase().replace(/[!?.\s]+$/,'');
+  return NOISE_WORDS.includes(b) || b.length < 4;
 }
 
 async function startAnalysis() {
@@ -418,7 +422,7 @@ async function startAnalysis() {
     if(!resp.ok){const err=await resp.json();throw new Error(err.error?.message||`HTTP ${resp.status}`);}
     setProgress(85,'Отримали відповідь...');
     const data=await resp.json();
-    let raw=data.content[0].text.trim().replace(/```json|```/g,'').trim();
+    let raw=data.content[0].text.trim();raw=raw.split('```json').join('').split('```').join('').trim();
     const s=raw.indexOf('{'),e=raw.lastIndexOf('}');
     if(s!==-1&&e!==-1) raw=raw.slice(s,e+1);
     analysis=JSON.parse(raw);
@@ -435,17 +439,35 @@ async function startAnalysis() {
 }
 
 
-const DELIVERY_RE = /check.{0,20}result|attached above|please review|please check.{0,30}result|looking forward.{0,20}feedback|here you can find|results? attached|find.{0,20}result|updated result|check.{0,20}updated|sending.{0,20}result|prepared.{0,20}result|final result is ready|result is ready|check the.{0,20}result|check.{0,10}(?:new|first|updated|latest).{0,10}result|share your (?:feedback|thoughts)|let us know your thoughts|let us know if.{0,20}(?:good|ok|correct|proceed)|review the prepared|prepared.{0,10}(?:draft|result|image)/i;
-const FUTURE_RE = /will send|will prepare|will provide|will get back|will check|will be ready|will present|aiming to provide|going to send/i;
-const APPROVAL_RE = /^(ok\.?|okay|approved|perfect|great|noted|received|got it|will do|sounds good|yes please|confirmed|moving forward|thank you|thanks)[.!,\s]*$/i;
+const DELIVERY_PHRASES = [
+  'check result','check the result','check updated result','check new result','check first result',
+  'attached above','please review','looking forward to your feedback','looking forward to feedback',
+  'here you can find','results attached','result attached','updated result','find requested',
+  'final result is ready','result is ready','please check','share your feedback',
+  'share your thoughts','let us know your thoughts','let us know if we are good',
+  'let us know if everything','review the prepared','prepared draft','check the updated',
+  'sending the updated','sending updated result','let us know if we can proceed',
+  'let us know your thoughts','please find the result','please find result'
+];
+const FUTURE_PHRASES = [
+  'will send you','will prepare','will provide','will get back','will be ready',
+  'will present','aiming to provide','going to send','i will send','we will send',
+  'will show you','i will show','we will show','will finish','will complete'
+];
+const APPROVAL_WORDS = [
+  'ok','okay','approved','perfect','great','noted','received','got it',
+  'will do','sounds good','yes please','confirmed','moving forward','thank you','thanks'
+];
 
 function isDelivery(body) {
-  const b = String(body||'');
-  return DELIVERY_RE.test(b) && !FUTURE_RE.test(b);
+  const b = String(body||'').toLowerCase();
+  if (FUTURE_PHRASES.some(p => b.includes(p))) return false;
+  return DELIVERY_PHRASES.some(p => b.includes(p));
 }
 function isApproval(body) {
-  const b = String(body||'').trim();
-  return APPROVAL_RE.test(b) || b.length < 25;
+  const b = String(body||'').trim().toLowerCase().replace(/[.!,\s]+$/,'');
+  if (b.length < 25) return true;
+  return APPROVAL_WORDS.some(w => b === w || b === w + '!' || b === w + '.');
 }
 function countRounds(msgs) {
   let rounds = 0;
