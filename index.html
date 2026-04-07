@@ -475,6 +475,7 @@ function countRounds(msgs) {
   let rounds = 0;
   let state = 'waiting_delivery';
   let lastDeliveryDate = null;
+  let deliveryCount = 0;
   let i = 0;
   while (i < msgs.length) {
     const m = msgs[i];
@@ -483,9 +484,14 @@ function countRounds(msgs) {
     const client = isClient(m);
     const pub = isPublic(m);
     if (state === 'waiting_delivery') {
-      if (!client && pub && isDelivery(body) && lastDeliveryDate !== date) {
-        lastDeliveryDate = date;
-        state = 'waiting_feedback';
+      if (!client && pub) {
+        const del = isDelivery(body);
+        if (del && lastDeliveryDate !== date) {
+          deliveryCount++;
+          if(deliveryCount<=3) console.log('[PM] delivery found:', date, body.slice(0,80));
+          lastDeliveryDate = date;
+          state = 'waiting_feedback';
+        }
       }
     } else if (state === 'waiting_feedback') {
       if (client) {
@@ -504,6 +510,7 @@ function countRounds(msgs) {
     }
     i++;
   }
+  console.log('[PM] countRounds done: deliveries=',deliveryCount,'rounds=',rounds);
   return rounds;
 }
 
