@@ -331,16 +331,16 @@ function loadFile(f) {
 }
 
 function parseCSV(text) {
-  const lines=text.trim().split(/\r?\n/);
+  const lines=text.trim().split('\n').map(l=>l.endsWith('\r')?l.slice(0,-1):l);
   if(lines.length<2) return null;
   const sep=lines[0].split(';').length>lines[0].split(',').length?';':',';
-  const headers=splitLine(lines[0],sep).map(h=>h.replace(/^"|"$/g,'').trim());
+  const headers=splitLine(lines[0],sep).map(h=>{let v=h.trim();if(v.startsWith('"'))v=v.slice(1);if(v.endsWith('"'))v=v.slice(0,-1);return v.trim();});
   const rows=[];
   for(let i=1;i<lines.length;i++){
     const vals=splitLine(lines[i],sep);
     if(vals.length<3) continue;
     const obj={};
-    headers.forEach((h,idx)=>{obj[h]=(vals[idx]||'').replace(/^"|"$/g,'').trim();});
+    headers.forEach((h,idx)=>{let v=(vals[idx]||'').trim();if(v.startsWith('"'))v=v.slice(1);if(v.endsWith('"'))v=v.slice(0,-1);obj[h]=v.trim();});
     rows.push(obj);
   }
   return {rows};
@@ -375,7 +375,8 @@ const NOISE_WORDS = ['++','ok','ок','okay','дякую','дякуємо','note
   'great','ясно','добре','ладно','супер','чудово','все','хм','...','—','-','так','ні','нє','ага','угу'];
 function isNoise(body){
   if(!body||body.length<8) return true;
-  const b = String(body).trim().toLowerCase().replace(/[!?.\s]+$/,'');
+  let b = String(body).trim().toLowerCase();
+  while (b.length > 0 && '!?. '.includes(b[b.length-1])) b = b.slice(0,-1);
   return NOISE_WORDS.includes(b) || b.length < 4;
 }
 
@@ -465,7 +466,8 @@ function isDelivery(body) {
   return DELIVERY_PHRASES.some(p => b.includes(p));
 }
 function isApproval(body) {
-  const b = String(body||'').trim().toLowerCase().replace(/[.!,\s]+$/,'');
+  let b = String(body||'').trim().toLowerCase();
+  while (b.length > 0 && '.!,? '.includes(b[b.length-1])) b = b.slice(0,-1);
   if (b.length < 25) return true;
   return APPROVAL_WORDS.some(w => b === w || b === w + '!' || b === w + '.');
 }
