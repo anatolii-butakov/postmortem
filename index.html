@@ -530,12 +530,14 @@ function buildStats(rows) {
       if(!cl&&pub){if(lastCd){ourWait+=Math.round((d-lastCd)/86400000);}lastTd=d;lastCd=null;}
       else if(cl){if(lastTd){clientWait+=Math.round((d-lastTd)/86400000);}lastCd=d;lastTd=null;}
     });
+    console.log('[PM] task start:',name,'ts len:',ts.length,'pub:',ts.filter(r=>isPublic(r)).length);
     const rounds=countRounds(ts);
     console.log('[PM] task:',name,'rounds:',rounds,'msgs:',ts.length);
     return {name,start:tS.toISOString().slice(0,10),end:tE.toISOString().slice(0,10),
       days:Math.round((tE-tS)/86400000),rounds,ourWait,clientWait};
   }).filter(Boolean);
 
+  console.log('[PM] tasks built:', tasks.length, tasks.map(t=>t&&t.name));
   const clientMsgs=sorted.filter(isClient);
   const gaps=[];
   for(let i=1;i<clientMsgs.length;i++){
